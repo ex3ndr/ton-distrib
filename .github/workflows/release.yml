@@ -1,0 +1,143 @@
+name: Release Distributive
+
+on: [workflow_dispatch]
+
+jobs:
+  build-linux-x64:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:      
+        submodules: 'recursive'
+    - name: Run Cppcheck
+      uses: Bedzior/run-cppcheck@master
+      with:
+        enabled checks: all
+        enable inconclusive: true
+        generate report: true
+    - name: Upload report
+      uses: actions/upload-artifact@v1
+      with:
+        name: report
+        path: output
+    - name: mkdir
+      run: |
+        mkdir build
+    - name: cmake
+      run: | 
+        cd build
+        cmake ..
+    - name: make -j4
+      run: |
+        cd build
+        make -j4
+    - name: find & copy binaries
+      run: |
+        mkdir artifacts
+        cp --parents build/crypto/fift build/crypto/adjust-block build/crypto/dump-block build/crypto/tlbc build/crypto/func build/crypto/create-state build/validator-engine-console/validator-engine-console build/tonlib/tonlib-cli build/tonlib/libtonlibjson.so.0.5 build/tddb/io-bench build/http/http-proxy build/tdnet/udp_ping_pong build/tdnet/tcp_ping_pong build/rldp-http-proxy/rldp-http-proxy build/dht-server/dht-server build/lite-client/lite-client build/validator-engine/validator-engine build/utils/generate-random-id build/utils/pack-viewer build/utils/json2tlo build/adnl/adnl-proxy build/adnl/adnl-pong artifacts
+    - name: Upload artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: ton-binaries
+        path: artifacts
+  build-windows-x64:
+    runs-on: windows-2019
+    steps:
+      - name: Get Current OS version
+        run: |
+          systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
+
+      - name: Check out current repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Check out zlib repository
+        uses: actions/checkout@v2
+        with:
+          repository: desktop-app/zlib
+          path: zlib
+          
+      - name: Setup msbuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
+                
+      - name: Compile zlib Win64
+        run: |
+          cd zlib\contrib\vstudio\vc14
+          msbuild zlibstat.vcxproj /p:Configuration=Debug /p:platform=x64        
+          msbuild zlibstat.vcxproj /p:Configuration=ReleaseWithoutAsm /p:platform=x64
+          
+      - name: Install OpenSSL Win64
+        run: |
+          curl -o openssl.msi https://slproweb.com/download/Win64OpenSSL-1_1_1L.msi
+          msiexec /i openssl.msi /quiet /qn /norestart
+          
+      - name: Build ton
+        run: |
+          set root=%cd%
+          echo %root%
+          mkdir build
+          cd build
+          cmake -DZLIB_FOUND=1 -DZLIB_INCLUDE_DIR=%root%\zlib -DZLIB_LIBRARY=%root%\zlib\contrib\vstudio\vc14\x64\ZlibStatReleaseWithoutAsm\zlibstat.lib -DCMAKE_CXX_FLAGS="/DTD_WINDOWS=1 /EHsc /bigobj /W0" -DCMAKE_BUILD_TYPE=Release ..
+          
+      - name: Compile ton
+        run: |       
+          cd build   
+          cmake --build .
+        continue-on-error: true          
+          
+      - name: Show executables
+        run: |
+          cd build          
+          dir *.exe /a-D /S /B
+          
+      - name: Check if validator-engine.exe exists
+        run: |
+          set root=%cd%
+          copy %root%\build\validator-engine\Debug\validator-engine.exe test
+          
+      - name: Find & copy binaries
+        run: |
+          mkdir artifacts
+          for /f %%a in ('dir *.exe /b /a /s') do copy /Y %%a artifacts
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: ton-win64-binaries
+          path: artifacts
+  build-macos-x64:
+    runs-on: macos-10.15
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:      
+        submodules: 'recursive'
+    - name: Compile OpenSSL
+      run: |
+        git clone https://github.com/openssl/openssl openssl_1_1_1
+        cd openssl_1_1_1
+        git checkout OpenSSL_1_1_1-stable
+        ./Configure --prefix=/usr/local/macos darwin64-x86_64-cc -static -mmacosx-version-min=10.15
+        make build_libs -j4
+
+    - name: Build TON
+      run: |
+        rootPath=`pwd`
+        mkdir build
+        cd build
+        cmake -DOPENSSL_FOUND=1 -DOPENSSL_INCLUDE_DIR=$rootPath/openssl_1_1_1/include -DOPENSSL_CRYPTO_LIBRARY=$rootPath/openssl_1_1_1/libcrypto.a -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.15 -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_BUILD_TYPE=Release ..
+        make -j4
+        
+    - name: Find & copy binaries
+      run: |
+        mkdir artifacts
+        rsync -r --exclude 'CMakeFiles' --exclude 'Makefile' --exclude '*.a' --exclude '*.cmake' --exclude 'third-party' --exclude 'test-*' --exclude '*.cc' --exclude '*.json' --exclude '*.txt' build/* artifacts/        
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: ton-macos-binaries
+        path: artifacts  
