@@ -1,9 +1,6 @@
 name: Build Docker Ubuntu Image
 
-on:
-  push:
-    branches:
-      - 'master'
+on: [workflow_dispatch]
 
 env:
   REGISTRY: ghcr.io
