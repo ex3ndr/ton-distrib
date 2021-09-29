@@ -1,10 +1,29 @@
 name: Release Distributive
 
-on: [workflow_dispatch]
+on: 
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Name of version  (ie 5.5.0)'
+        required: true
 
 jobs:
+  create-release:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.versionName }}
+          release_name: TON v${{ github.event.inputs.versionName }}
+          draft: true
+          prerelease: false
   build-linux-x64:
     runs-on: ubuntu-18.04
+    needs: create-release
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
@@ -43,6 +62,7 @@ jobs:
         path: artifacts
   build-windows-x64:
     runs-on: windows-2019
+    needs: create-release
     steps:
       - name: Get Current OS version
         run: |
@@ -109,7 +129,7 @@ jobs:
           path: artifacts
   build-macos-x64:
     runs-on: macos-10.15
-
+    needs: create-release
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
