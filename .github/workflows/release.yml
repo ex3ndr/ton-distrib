@@ -49,12 +49,12 @@ jobs:
     - name: Upload fift
       uses: actions/upload-artifact@master
       with:
-        name: fift-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
+        name: fift-${{ github.event.inputs.versionName }}-linux-x64
         path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
     - name: Upload func
       uses: actions/upload-artifact@master
       with:
-        name: func-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
+        name: func-${{ github.event.inputs.versionName }}-linux-x64
         path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
   build-macos-x64:
     runs-on: macos-10.15
@@ -104,12 +104,12 @@ jobs:
     - name: Upload fift
       uses: actions/upload-artifact@master
       with:
-        name: fift-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
+        name: fift-${{ github.event.inputs.versionName }}-macos-x64
         path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
     - name: Upload func
       uses: actions/upload-artifact@master
       with:
-        name: func-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
+        name: func-${{ github.event.inputs.versionName }}-macos-x64
         path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
   create-release:
     runs-on: ubuntu-18.04
@@ -126,7 +126,5 @@ jobs:
           tag_name: v${{ github.event.inputs.versionName }}
           draft: true
           files: |
-            artifacts/fift-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
-            artifacts/func-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
-            artifacts/fift-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
-            artifacts/func-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
+            artifacts/fift*/*.tar.gz
+            artifacts/func*/*.tar.gz
