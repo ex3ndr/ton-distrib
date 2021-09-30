@@ -51,15 +51,25 @@ jobs:
       run: |
         cd build
         make -j4
-    - name: find & copy binaries
+    - name: Find & copy binaries
       run: |
         mkdir artifacts
-        cp --parents build/crypto/fift build/crypto/adjust-block build/crypto/dump-block build/crypto/tlbc build/crypto/func build/crypto/create-state build/validator-engine-console/validator-engine-console build/tonlib/tonlib-cli build/tonlib/libtonlibjson.so.0.5 build/tddb/io-bench build/http/http-proxy build/tdnet/udp_ping_pong build/tdnet/tcp_ping_pong build/rldp-http-proxy/rldp-http-proxy build/dht-server/dht-server build/lite-client/lite-client build/validator-engine/validator-engine build/utils/generate-random-id build/utils/pack-viewer build/utils/json2tlo build/adnl/adnl-proxy build/adnl/adnl-pong artifacts
-    - name: Upload artifacts
+        cp crypto/fift artifacts/
+        cp crypto/func artifacts/
+        cd artifacts
+        tar -zcvf fift-${{ github.event.inputs.versionName }}.tar.gz fift
+        tar -zcvf func-${{ github.event.inputs.versionName }}.tar.gz func
+        
+    - name: Upload fift
       uses: actions/upload-artifact@master
       with:
-        name: ton-linux-x64-${{ github.event.inputs.versionName }}
-        path: artifacts
+        name: fift-linux-x64-${{ github.event.inputs.versionName }}
+        path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
+    - name: Upload func
+      uses: actions/upload-artifact@master
+      with:
+        name: func-linux-x64-${{ github.event.inputs.versionName }}
+        path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
   build-macos-x64:
     runs-on: macos-10.15
     needs: create-release
@@ -87,10 +97,19 @@ jobs:
     - name: Find & copy binaries
       run: |
         mkdir artifacts
-        rsync -r --exclude 'CMakeFiles' --exclude 'Makefile' --exclude '*.a' --exclude '*.cmake' --exclude 'third-party' --exclude 'test-*' --exclude '*.cc' --exclude '*.json' --exclude '*.txt' build/* artifacts/
+        cp crypto/fift artifacts/
+        cp crypto/func artifacts/
+        cd artifacts
+        tar -zcvf fift-${{ github.event.inputs.versionName }}.tar.gz fift
+        tar -zcvf func-${{ github.event.inputs.versionName }}.tar.gz func
         
-    - name: Upload artifacts
+    - name: Upload fift
       uses: actions/upload-artifact@master
       with:
-        name: ton-macos-x64-${{ github.event.inputs.versionName }}
-        path: artifacts
+        name: fift-macos-x64-${{ github.event.inputs.versionName }}
+        path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
+    - name: Upload func
+      uses: actions/upload-artifact@master
+      with:
+        name: func-macos-x64-${{ github.event.inputs.versionName }}
+        path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
