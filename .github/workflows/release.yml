@@ -107,6 +107,8 @@ jobs:
         cd artifacts
         codesign --timestamp --options=runtime -s "${{ secrets.BUILD_TEAM_NAME }}" -v func
         codesign --timestamp --options=runtime -s "${{ secrets.BUILD_TEAM_NAME }}" -v fift
+        zip artifacts.zip func fift
+        xcrun altool --notarize-app --primary-bundle-id org.ton --username="${{ secrets.NOTARIZE_USERNAME }}" --password="${{ secrets.NOTARIZE_PASSWORD }}" --team-id=${{ secrets.NOTARIZE_TEAM }}  --file artifacts.zip
         
     - name: Find & copy binaries
       run: |
