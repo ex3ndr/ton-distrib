@@ -105,8 +105,8 @@ jobs:
         cp build/crypto/fift artifacts/
         cp build/crypto/func artifacts/
         cd artifacts
-        codesign --timestamp --options=runtime -s "${{ secret.BUILD_TEAM_NAME }}" -v func
-        codesign --timestamp --options=runtime -s "${{ secret.BUILD_TEAM_NAME }}" -v fift
+        codesign --timestamp --options=runtime -s "${{ secrets.BUILD_TEAM_NAME }}" -v func
+        codesign --timestamp --options=runtime -s "${{ secrets.BUILD_TEAM_NAME }}" -v fift
         
     - name: Find & copy binaries
       run: |
