@@ -8,22 +8,8 @@ on:
         required: true
 
 jobs:
-  create-release:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Create release
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.event.inputs.versionName }}
-          release_name: TON v${{ github.event.inputs.versionName }}
-          draft: true
-          prerelease: false
   build-linux-x64:
     runs-on: ubuntu-18.04
-    needs: create-release
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
@@ -63,16 +49,15 @@ jobs:
     - name: Upload fift
       uses: actions/upload-artifact@master
       with:
-        name: fift-linux-x64-${{ github.event.inputs.versionName }}
+        name: fift-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
         path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
     - name: Upload func
       uses: actions/upload-artifact@master
       with:
-        name: func-linux-x64-${{ github.event.inputs.versionName }}
+        name: func-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
         path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
   build-macos-x64:
     runs-on: macos-10.15
-    needs: create-release
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
@@ -119,10 +104,29 @@ jobs:
     - name: Upload fift
       uses: actions/upload-artifact@master
       with:
-        name: fift-macos-x64-${{ github.event.inputs.versionName }}
+        name: fift-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
         path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
     - name: Upload func
       uses: actions/upload-artifact@master
       with:
-        name: func-macos-x64-${{ github.event.inputs.versionName }}
+        name: func-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
         path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
+  create-release:
+    runs-on: ubuntu-18.04
+    needs: [build-linux-x64, build-macos-x64]
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+          name: TON v${{ github.event.inputs.versionName }}
+          tag_name: v${{ github.event.inputs.versionName }}
+          draft: true
+          files: |
+            artifacts/fift-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
+            artifacts/func-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
+            artifacts/fift-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
+            artifacts/func-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
