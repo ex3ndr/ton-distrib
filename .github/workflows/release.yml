@@ -54,8 +54,8 @@ jobs:
     - name: Find & copy binaries
       run: |
         mkdir artifacts
-        cp crypto/fift artifacts/
-        cp crypto/func artifacts/
+        cp build/crypto/fift artifacts/
+        cp build/crypto/func artifacts/
         cd artifacts
         tar -zcvf fift-${{ github.event.inputs.versionName }}.tar.gz fift
         tar -zcvf func-${{ github.event.inputs.versionName }}.tar.gz func
@@ -97,8 +97,8 @@ jobs:
     - name: Find & copy binaries
       run: |
         mkdir artifacts
-        cp crypto/fift artifacts/
-        cp crypto/func artifacts/
+        cp build/crypto/fift artifacts/
+        cp build/crypto/func artifacts/
         cd artifacts
         tar -zcvf fift-${{ github.event.inputs.versionName }}.tar.gz fift
         tar -zcvf func-${{ github.event.inputs.versionName }}.tar.gz func
