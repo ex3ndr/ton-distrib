@@ -43,19 +43,19 @@ jobs:
         cp build/crypto/fift artifacts/
         cp build/crypto/func artifacts/
         cd artifacts
-        tar -zcvf fift-${{ github.event.inputs.versionName }}.tar.gz fift
-        tar -zcvf func-${{ github.event.inputs.versionName }}.tar.gz func
+        tar -zcvf fift-${{ github.event.inputs.versionName }}-linux-x64.tar.gz fift
+        tar -zcvf func-${{ github.event.inputs.versionName }}-linux-x64.tar.gz func
         
     - name: Upload fift
       uses: actions/upload-artifact@master
       with:
         name: fift-${{ github.event.inputs.versionName }}-linux-x64
-        path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
+        path: artifacts/fift-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
     - name: Upload func
       uses: actions/upload-artifact@master
       with:
         name: func-${{ github.event.inputs.versionName }}-linux-x64
-        path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
+        path: artifacts/func-${{ github.event.inputs.versionName }}-linux-x64.tar.gz
   build-macos-x64:
     runs-on: macos-10.15
     steps:
@@ -98,19 +98,19 @@ jobs:
     - name: Find & copy binaries
       run: |
         cd artifacts
-        tar -zcvf fift-${{ github.event.inputs.versionName }}.tar.gz fift
-        tar -zcvf func-${{ github.event.inputs.versionName }}.tar.gz func
+        tar -zcvf fift-${{ github.event.inputs.versionName }}-macos-x64.tar.gz fift
+        tar -zcvf func-${{ github.event.inputs.versionName }}-macos-x64.tar.gz func
         
     - name: Upload fift
       uses: actions/upload-artifact@master
       with:
         name: fift-${{ github.event.inputs.versionName }}-macos-x64
-        path: artifacts/fift-${{ github.event.inputs.versionName }}.tar.gz
+        path: artifacts/fift-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
     - name: Upload func
       uses: actions/upload-artifact@master
       with:
         name: func-${{ github.event.inputs.versionName }}-macos-x64
-        path: artifacts/func-${{ github.event.inputs.versionName }}.tar.gz
+        path: artifacts/func-${{ github.event.inputs.versionName }}-macos-x64.tar.gz
   create-release:
     runs-on: ubuntu-18.04
     needs: [build-linux-x64, build-macos-x64]
